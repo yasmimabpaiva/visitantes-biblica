@@ -168,6 +168,26 @@
   .b-sim { background: var(--ok-soft); color: var(--ok); }
   .b-nao { background: var(--warn-soft); color: var(--warn); }
   .b-visitando { background: var(--cur-soft); color: var(--cur); }
+  .e-espera { background: var(--warn-soft); color: var(--warn); }
+  .e-contatado { background: var(--cur-soft); color: var(--cur); }
+  .e-gc { background: var(--ok-soft); color: var(--ok); }
+  .e-membro { background: #f1e9ff; color: #6a2fd0; }
+  .late { color: var(--warn); font-weight: 600; }
+  .tl { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 0; }
+  .tl li { position: relative; padding: 0 0 12px 22px; font-size: .86rem; }
+  .tl li::before { content: ""; position: absolute; left: 5px; top: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--line-strong); }
+  .tl li::after { content: ""; position: absolute; left: 8.5px; top: 16px; bottom: 0; width: 1px; background: var(--line); }
+  .tl li:last-child::after { display: none; }
+  .tl li.c::before { background: var(--cur); } .tl li.g::before { background: var(--ok); } .tl li.m::before { background: #6a2fd0; }
+  .tl .d { color: var(--muted); font-size: .76rem; font-variant-numeric: tabular-nums; display: block; }
+  .grid-c { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+  .grid-c .full { grid-column: 1 / -1; }
+  .grid-c > * { min-width: 0; width: 100%; }
+  @media (max-width: 400px) { .grid-c { grid-template-columns: 1fr; } }
+  .wa { background: #e7f8ee; color: #128c4b; border-color: #bfe8cf; }
+  .funnel { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+  @media (max-width: 760px) { .funnel { grid-template-columns: 1fr 1fr; } }
+  .sec-block { margin-bottom: 24px; }
 
   /* ---------- Planilha ---------- */
   .sheet-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: .82rem; color: var(--muted); margin-bottom: 12px; }
@@ -404,14 +424,15 @@
 
   <!-- VISITANTES -->
   <section id="panel-visitantes" hidden>
-    <div class="page-head"><div><span class="eyebrow" data-igname></span><h2>Visitantes</h2><p>Abra um visitante para ver a ficha completa, colocar num GC ou ver a rota.</p></div></div>
+    <div class="page-head"><div><span class="eyebrow" data-igname></span><h2>Visitantes</h2><p>Acompanhe cada pessoa: contato, encaminhamento para o GC e se virou membro.</p></div></div>
     <div class="toolbar">
       <input type="search" class="search" id="busca" placeholder="Buscar por nome, bairro, telefone ou GC">
       <div class="chips" id="filters">
         <button class="chip active" data-f="todos">Todos</button>
-        <button class="chip" data-f="nao">Sem GC</button>
-        <button class="chip" data-f="visitando">Visitando</button>
-        <button class="chip" data-f="sim">Com GC</button>
+        <button class="chip" data-f="espera">Aguardando contato</button>
+        <button class="chip" data-f="contatado">Contatados</button>
+        <button class="chip" data-f="gc">No GC</button>
+        <button class="chip" data-f="membro">Membros</button>
       </div>
     </div>
     <div class="card list" id="lista"></div>
@@ -497,7 +518,7 @@ const GCS = [
   { id:10, igreja:"bh",      nome:"GC Peniel",      lideres:"Lucas e Carol",         bairro:"Castanheira 1", addr:"Rua Padre Henrique Vaz, 12 – Castanheira 1" },
   { id:11, igreja:"ibirite", nome:"GC Koinonia",    lideres:"Hantter e Meire",       bairro:"Palmeiras",     addr:"Av. Babaçu, 990 – Palmeiras / Ibirité" },
   { id:12, igreja:"bh",      nome:"GC Ahavá",       lideres:"Filipe e Sarah",        bairro:"Regina",        addr:"Rua Sebastião dos Santos, 265 – Regina" },
-  { id:13, igreja:"bh",      nome:"GC Doxologia",   lideres:"Van Baster e Yasmim",   bairro:"Tirol",         addr:"Rua Sérgio Nápoles Fonseca, 100 – Tirol" },
+  { id:13, igreja:"bh",      nome:"GC Doxologia",   lideres:"Van Baster e Yasmim",   bairro:"Tirol",         addr:"Rua Aristides Ferreira de Castro, 483 – Tirol" },
   { id:14, igreja:"bh",      nome:"GC Chosen",      lideres:"Maiara",                bairro:"Castanheira 1", addr:"Rua Isabel Dalbem Itaboraí, 33 – Castanheira 1" },
   { id:15, igreja:"bh",      nome:"GC Jeová Jireh", lideres:"Rafael e Helen",        bairro:"Barreiro",      addr:"Rua Arthur Lourenço, 176A – Barreiro" },
   { id:16, igreja:"bh",      nome:"GC Kairós",      lideres:"Antônio Luiz e Cleuza", bairro:"Inconfidentes", addr:"Rua I, 305 Apto 301 B – Inconfidentes / Contagem" },
@@ -511,7 +532,7 @@ const GC_GEO = {
   4: [-19.984592, -44.024339], 5: [-19.987813, -44.048537], 6: [-19.985044, -44.009539],
   7: [-19.986244, -44.044364], 8: [-19.986780, -44.005011], 9: [-20.036069, -44.038761],
   10: [-19.996764, -44.034653], 11: [-19.979410, -44.072424], 12: [-19.983606, -44.055992],
-  13: [-19.984754, -44.047076], 14: [-19.996429, -44.034489], 15: [-19.980466, -44.026032],
+  13: [-19.989775, -44.045933], 14: [-19.996429, -44.034489], 15: [-19.980466, -44.026032],
   16: [-19.961434, -44.046447],
 };
 GCS.forEach(g => g.geo = GC_GEO[g.id] || null);
@@ -598,6 +619,13 @@ const gcById = id => GCS.find(g => g.id === id) || null;
 const daIgreja = ig => visitantes.filter(v => (v.igreja || "bh") === ig);
 const fmtDate = d => { if (!d) return ""; const [y, m, dd] = d.split("-"); return `${dd}/${m}/${y}`; };
 const fmtTs = ts => ts ? new Date(ts).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "";
+const ETAPAS = { espera: "Aguardando contato", contatado: "Contatado", gc: "No GC", membro: "Membro" };
+function etapa(v) { if (v.virou_membro) return "membro"; if (v.gc_status === "sim") return "gc"; if ((v.contatos || []).length) return "contatado"; return "espera"; }
+const contatosOrd = v => (v.contatos || []).slice().sort((a, b) => (a.d || "").localeCompare(b.d || ""));
+const ultimoContato = v => { const c = contatosOrd(v); return c.length ? c[c.length - 1] : null; };
+function diasDesde(d) { if (!d) return null; const [y, m, dd] = d.split("-").map(Number); const t = new Date(y, m - 1, dd); const n = new Date(); n.setHours(0, 0, 0, 0); return Math.round((n - t) / 864e5); }
+const haDias = n => n == null ? "" : n <= 0 ? "hoje" : n === 1 ? "ontem" : `há ${n} dias`;
+function waUrl(tel) { let d = String(tel || "").replace(/\D/g, ""); if (!d) return ""; if (d.length <= 11) d = "55" + d; return "https://wa.me/" + d; }
 const statusLabel = s => s === "sim" ? "No GC" : s === "visitando" ? "Visitando GC" : "Sem GC";
 const iniciais = n => String(n || "?").split(/\s+/).filter(Boolean).map(p => p[0]).slice(0, 2).join("").toUpperCase();
 const hoje = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
@@ -725,7 +753,7 @@ function renderLista() {
   const lista = base.filter(v => {
     const gc = gcById(v.gc_id);
     const okB = !busca || [v.nome, v.bairro, v.telefone, gc && gc.nome].some(x => norm(x).includes(busca));
-    return okB && (filtro === "todos" || (v.gc_status || "nao") === filtro);
+    return okB && (filtro === "todos" || etapa(v) === filtro);
   }).sort((a, b) => (b.criadoEm || 0) - (a.criadoEm || 0));
   if (!lista.length) {
     $("lista").innerHTML = base.length
@@ -734,13 +762,17 @@ function renderLista() {
     return;
   }
   $("lista").innerHTML = lista.map(v => {
-    const st = v.gc_status || "nao", gc = gcById(v.gc_id), sug = gcById(v.sug_gc_id);
+    const et = etapa(v), gc = gcById(v.gc_id), sug = gcById(v.sug_gc_id), uc = ultimoContato(v);
     const meta = [fmtDate(v.data), v.bairro, v.telefone].filter(Boolean).map(esc).join(" · ");
+    const espera = diasDesde(v.data);
+    const acomp = uc ? `Último contato ${haDias(diasDesde(uc.d))}${uc.canal ? " · " + esc(uc.canal) : ""}`
+      : et === "espera" ? `<span class="${espera > 7 ? "late" : ""}">Sem contato${espera != null ? " · visitou " + haDias(espera) : ""}</span>` : "";
     return `<div class="row">
-      <div class="av ${st === "sim" ? "" : "warn"}">${esc(iniciais(v.nome))}</div>
+      <div class="av ${et === "espera" ? "warn" : ""}">${esc(iniciais(v.nome))}</div>
       <div class="rinfo"><div class="rname">${esc(v.nome)}</div><div class="rmeta">${meta || "—"}</div>
+        ${acomp ? `<div class="rmeta">${acomp}</div>` : ""}
         ${gc ? `<div class="rsug">${esc(gc.nome)}</div>` : sug ? `<div class="rsug">Mais próximo: ${esc(sug.nome)}${v.sug_km != null ? " · " + fmtKm(v.sug_km) : ""}</div>` : ""}</div>
-      <span class="badge b-${st}">${statusLabel(st)}</span>
+      <span class="badge e-${et}">${ETAPAS[et]}</span>
       <button class="btn btn-ghost btn-sm" data-ver="${esc(v._id)}">Abrir</button>
     </div>`;
   }).join("");
@@ -767,8 +799,13 @@ const COLUNAS = [
   ["Quem convidou / rede", v => v.conheceu_det],
   ["Membro de igreja", v => v.membro === "sim" ? "Sim" : v.membro === "nao" ? "Não" : ""],
   ["Qual igreja", v => v.membro_qual],
-  ["Situação", v => statusLabel(v.gc_status)],
+  ["Etapa", v => ETAPAS[etapa(v)]],
   ["GC atual", v => gcById(v.gc_id)?.nome || ""],
+  ["Encaminhado ao GC em", v => fmtDate(v.data_encaminhado)],
+  ["Último contato", v => { const u = ultimoContato(v); return u ? fmtDate(u.d) : ""; }],
+  ["Nº de contatos", v => String((v.contatos || []).length || "")],
+  ["Histórico de contatos", v => contatosOrd(v).map(c => `${fmtDate(c.d)} ${c.canal || ""}${c.nota ? ": " + c.nota : ""}${c.por ? " (" + c.por + ")" : ""}`).join(" | ")],
+  ["Virou membro em", v => v.virou_membro ? (fmtDate(v.data_membro) || "Sim") : ""],
   ["GC mais próximo", v => gcById(v.sug_gc_id)?.nome || ""],
   ["Distância", v => v.sug_km != null ? fmtKm(v.sug_km) : ""],
   ["Observações", v => v.obs],
@@ -847,26 +884,30 @@ function renderGrupos() {
 // ===== Resumo =====
 function renderResumo() {
   const l = daIgreja(igreja);
-  const com = l.filter(v => v.gc_status === "sim").length, vis = l.filter(v => v.gc_status === "visitando").length;
-  const mes = hoje().slice(0, 7), doMes = l.filter(v => (v.data || "").startsWith(mes)).length;
+  const n = k => l.filter(v => etapa(v) === k).length;
+  const membros = n("membro"), noGc = n("gc") + membros;
+  const pct = x => l.length ? Math.round(x * 100 / l.length) + "%" : "0%";
   $("stats").innerHTML = `
     <div class="card stat"><div class="v c-cur">${l.length}</div><div class="k">Visitantes cadastrados</div></div>
-    <div class="card stat"><div class="v">${doMes}</div><div class="k">Visitas neste mês</div></div>
-    <div class="card stat"><div class="v c-ok">${com}</div><div class="k">Já estão num GC</div></div>
-    <div class="card stat"><div class="v c-warn">${l.length - com}</div><div class="k">Ainda sem GC${vis ? ` (${vis} visitando)` : ""}</div></div>`;
-  const sem = l.filter(v => v.gc_status !== "sim").sort((a, b) => (a.criadoEm || 0) - (b.criadoEm || 0));
+    <div class="card stat"><div class="v c-warn">${n("espera")}</div><div class="k">Aguardando contato</div></div>
+    <div class="card stat"><div class="v c-ok">${noGc}</div><div class="k">Encaminhados a um GC · ${pct(noGc)}</div></div>
+    <div class="card stat"><div class="v" style="color:#6a2fd0">${membros}</div><div class="k">Viraram membros · ${pct(membros)}</div></div>`;
   if (!l.length) { $("sem-gc").innerHTML = `<div class="card empty"><b>Sem dados ainda</b>Os números aparecem assim que houver cadastros na ${IGREJAS[igreja]}.</div>`; return; }
-  if (!sem.length) { $("sem-gc").innerHTML = `<div class="card empty"><b>Tudo em dia</b>Todos os visitantes da ${IGREJAS[igreja]} já estão num GC.</div>`; return; }
-  $("sem-gc").innerHTML = `<h3 class="sec-title">Para encaminhar (${sem.length})</h3><div class="card list">` + sem.map(v => {
-    const sug = gcById(v.sug_gc_id);
-    return `<div class="row">
-      <div class="av warn">${esc(iniciais(v.nome))}</div>
+  const linha = (v, extra, btn) => `<div class="row">
+      <div class="av ${etapa(v) === "espera" ? "warn" : ""}">${esc(iniciais(v.nome))}</div>
       <div class="rinfo"><div class="rname">${esc(v.nome)}</div>
-        <div class="rmeta">${[v.bairro, v.telefone, v.data ? "visitou em " + fmtDate(v.data) : ""].filter(Boolean).map(esc).join(" · ")}</div>
-        ${sug ? `<div class="rsug">Mais próximo: ${esc(sug.nome)} – ${esc(sug.lideres)}${v.sug_km != null ? " · " + fmtKm(v.sug_km) : ""}</div>` : ""}</div>
-      <button class="btn btn-primary btn-sm" data-ver="${esc(v._id)}">Encaminhar</button>
-    </div>`;
-  }).join("") + "</div>";
+        <div class="rmeta">${[v.bairro, v.telefone].filter(Boolean).map(esc).join(" · ") || "—"}</div>${extra}</div>
+      <button class="btn btn-primary btn-sm" data-ver="${esc(v._id)}">${btn}</button></div>`;
+  const ord = (a, b) => (a.data || "").localeCompare(b.data || "") || (a.criadoEm || 0) - (b.criadoEm || 0);
+  const espera = l.filter(v => etapa(v) === "espera").sort(ord);
+  const contat = l.filter(v => etapa(v) === "contatado").sort(ord);
+  let html = "";
+  if (espera.length) html += `<div class="sec-block"><h3 class="sec-title">Aguardando primeiro contato (${espera.length})</h3><div class="card list">` +
+    espera.map(v => { const d = diasDesde(v.data); return linha(v, `<div class="rmeta ${d > 7 ? "late" : ""}">Visitou ${haDias(d)}${v.data ? " (" + fmtDate(v.data) + ")" : ""}</div>`, "Registrar contato"); }).join("") + "</div></div>";
+  if (contat.length) html += `<div class="sec-block"><h3 class="sec-title">Contatados, ainda sem GC (${contat.length})</h3><div class="card list">` +
+    contat.map(v => { const u = ultimoContato(v), sug = gcById(v.sug_gc_id); return linha(v, `<div class="rmeta">Último contato ${haDias(diasDesde(u && u.d))}</div>${sug ? `<div class="rsug">Mais próximo: ${esc(sug.nome)}${v.sug_km != null ? " · " + fmtKm(v.sug_km) : ""}</div>` : ""}`, "Encaminhar"); }).join("") + "</div></div>";
+  if (!html) html = `<div class="card empty"><b>Tudo em dia</b>Todos os visitantes da ${IGREJAS[igreja]} já foram contatados e encaminhados.</div>`;
+  $("sem-gc").innerHTML = html;
 }
 
 function renderAll() {
@@ -875,7 +916,11 @@ function renderAll() {
   if (tab === "planilha") renderPlanilha();
   if (tab === "grupos") renderGrupos();
   if (tab === "resumo") renderResumo();
-  if (modalId) renderModal();
+  if (modalId && !modalOcupado()) renderModal();
+}
+function modalOcupado() {
+  const a = document.activeElement, ov = $("overlay");
+  return (a && ov.contains(a) && /INPUT|SELECT|TEXTAREA/.test(a.tagName)) || !!($("c-nota") && $("c-nota").value.trim());
 }
 
 // ===== Ficha (modal) =====
@@ -899,18 +944,39 @@ function renderModal() {
     + r("Visita", esc([fmtDate(v.data), v.hora ? "às " + v.hora : ""].filter(Boolean).join(" ")))
     + r("Como conheceu", esc([v.conheceu, v.conheceu_det].filter(Boolean).join(" – ")))
     + r("Membro de igreja", v.membro === "sim" ? "Sim" + (v.membro_qual ? " – " + esc(v.membro_qual) : "") : v.membro === "nao" ? "Não" : "")
-    + r("Situação", `<span class="badge b-${v.gc_status || "nao"}">${statusLabel(v.gc_status)}</span>`)
+    + r("Etapa", `<span class="badge e-${etapa(v)}">${ETAPAS[etapa(v)]}</span>`)
     + (gc ? r("GC atual", `${esc(gc.nome)} – ${esc(gc.lideres)}${gc.geo ? `<br><a class="lnk" href="${rotaUrl(origemDe(v), gc)}" target="_blank" rel="noopener">Ver rota ↗</a>` : ""}`) : "")
     + (v.obs ? r("Observações", esc(v.obs)) : "")
     + (v.criadoEm ? r("Cadastrado", esc(fmtTs(v.criadoEm) + (quem(v) ? " por " + quem(v) : ""))) : "");
+  // Linha do tempo do acompanhamento
+  const ev = [];
+  if (v.data) ev.push({ d: v.data, cls: "", t: "Visitou a " + IGREJAS[ig] });
+  contatosOrd(v).forEach(c => ev.push({ d: c.d, cls: "c", t: `Contato ${c.canal ? "por " + esc(c.canal) : ""}${c.nota ? " — " + esc(c.nota) : ""}${c.por ? ` <span class="d">por ${esc(c.por)}</span>` : ""}` }));
+  if (gc) ev.push({ d: v.data_encaminhado || "", cls: "g", t: "Encaminhado ao " + esc(gc.nome) });
+  if (v.virou_membro) ev.push({ d: v.data_membro || "", cls: "m", t: "Tornou-se membro" });
+  ev.sort((a, b) => (a.d || "9").localeCompare(b.d || "9"));
+  html += `<div class="m-box"><span class="mini-l">Acompanhamento</span><ul class="tl">${ev.map(e => `<li class="${e.cls}"><span class="d">${e.d ? fmtDate(e.d) : "sem data"}</span>${e.t}</li>`).join("")}</ul></div>`;
   if (!gc) {
     const loc = v.lat != null ? { lat: v.lat, lng: v.lng, fonte: "coordenadas" } : localizar(v.bairro);
     if (loc) html += `<div class="m-box"><span class="mini-l">GC mais próximo</span>${blocoProximo(loc, ig, origemDe(v))}</div>`;
   }
   $("m-body").innerHTML = html;
+  const wa = waUrl(v.telefone);
   $("m-actions").innerHTML = podeEscrever ? `
+    <div class="m-box"><span class="mini-l">Registrar contato</span>
+      <div class="grid-c">
+        <input type="date" id="c-data" value="${hoje()}" aria-label="Data do contato">
+        <select id="c-canal" aria-label="Como foi o contato"><option>WhatsApp</option><option>Ligação</option><option>Visita em casa</option><option>Conversa na igreja</option><option>Outro</option></select>
+        <input type="text" id="c-nota" class="full" placeholder="Como foi? Ex: gostou do culto, quer conhecer o GC">
+        <button class="btn btn-primary" id="c-salvar">Salvar contato</button>
+        ${wa ? `<a class="btn btn-ghost wa" href="${wa}" target="_blank" rel="noopener">Chamar no WhatsApp ↗</a>` : ""}
+      </div></div>
     <div class="m-box"><label class="l" for="move-gc">Colocar no GC</label>
       <div class="mrow"><select id="move-gc"></select><button class="btn btn-ok" id="m-move">Salvar</button></div></div>
+    <div class="m-box"><span class="mini-l">Membresia</span>
+      ${v.virou_membro ? `<div class="mrow" style="align-items:center"><span style="flex:1">Membro desde ${fmtDate(v.data_membro) || "—"}</span><button class="btn btn-ghost btn-sm" id="m-membro-off">Desfazer</button></div>`
+        : `<div class="mrow"><input type="date" id="m-membro-data" value="${hoje()}" aria-label="Data em que virou membro"><button class="btn btn-ok" id="m-membro">Marcar como membro</button></div>`}
+    </div>
     <div class="actions" style="margin-top:16px">
       <button class="btn btn-ghost btn-sm" id="m-transfer">Transferir para ${IGREJAS[outra]}</button>
       <button class="btn btn-danger btn-sm" id="m-del">${confirmDel ? "Confirmar exclusão" : "Excluir cadastro"}</button>
@@ -918,13 +984,27 @@ function renderModal() {
   if (!podeEscrever) return;
   fillGcSelect($("move-gc"), ig, v.gc_id || v.sug_gc_id);
   $("m-move").onclick = () => moverGC(v);
+  $("c-salvar").onclick = () => registrarContato(v);
+  if ($("m-membro")) $("m-membro").onclick = () => marcarMembro(v, true);
+  if ($("m-membro-off")) $("m-membro-off").onclick = () => marcarMembro(v, false);
   $("m-transfer").onclick = () => transferir(v, outra);
   $("m-del").onclick = () => { if (!confirmDel) { confirmDel = true; renderModal(); } else remover(v); };
 }
 async function moverGC(v) {
   const gcId = parseInt($("move-gc").value);
   if (!gcId) { toast("Selecione um GC"); return; }
-  try { await salvarItem(Object.assign({}, v, { gc_id: gcId, gc_status: "sim" })); toast(`${v.nome} agora está no ${gcById(gcId).nome}`); fecharModal(); }
+  try { await salvarItem(Object.assign({}, v, { gc_id: gcId, gc_status: "sim", data_encaminhado: v.gc_id === gcId && v.data_encaminhado ? v.data_encaminhado : hoje() })); renderModal(); toast(`${v.nome} agora está no ${gcById(gcId).nome}`); }
+  catch (e) { toast("Não foi possível salvar. Tente de novo."); }
+}
+async function registrarContato(v) {
+  const c = { d: $("c-data").value || hoje(), canal: $("c-canal").value, nota: $("c-nota").value.trim(), por: meuNome() };
+  const btn = $("c-salvar"); btn.disabled = true;
+  try { await salvarItem(Object.assign({}, v, { contatos: (v.contatos || []).concat([c]) })); $("c-nota").value = ""; renderModal(); toast("Contato registrado"); }
+  catch (e) { toast("Não foi possível salvar. Tente de novo."); btn.disabled = false; }
+}
+async function marcarMembro(v, sim) {
+  const extra = sim ? { virou_membro: true, data_membro: ($("m-membro-data") && $("m-membro-data").value) || hoje() } : { virou_membro: false, data_membro: "" };
+  try { await salvarItem(Object.assign({}, v, extra)); renderModal(); toast(sim ? `${v.nome} marcado como membro` : "Membresia desfeita"); }
   catch (e) { toast("Não foi possível salvar. Tente de novo."); }
 }
 async function transferir(v, para) {
@@ -963,39 +1043,87 @@ async function api(acao, dados) {
   if (!j.ok) throw { code: j.erro || "erro" };
   return j;
 }
+// ----- Cópia salva no próprio site (neste aparelho) + fila de envio -----
+const CACHE_KEY = "gc-cache", FILA_KEY = "gc-fila";
+let fila = []; try { fila = JSON.parse(localStorage.getItem(FILA_KEY) || "[]"); } catch (e) { fila = []; }
+let enviando = false;
+function guardarLocal() {
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ itens: visitantes, em: Date.now() })); } catch (e) {}
+  try { localStorage.setItem(FILA_KEY, JSON.stringify(fila)); } catch (e) {}
+}
+function lerCache() { try { return JSON.parse(localStorage.getItem(CACHE_KEY) || "null"); } catch (e) { return null; } }
+// Aplica por cima da lista as alterações que ainda não chegaram à planilha
+function comFila(itens) {
+  let m = itens.slice();
+  fila.forEach(op => {
+    if (op.acao === "salvar") { const it = Object.assign({}, op.dados.item, { _id: op.dados.id }); const i = m.findIndex(x => x._id === it._id); if (i >= 0) m[i] = it; else m.push(it); }
+    if (op.acao === "excluir") m = m.filter(x => x._id !== op.dados.id);
+  });
+  return m;
+}
+function statusConexao(online) {
+  if (fila.length) {
+    setSync("off", `${fila.length} pendente${fila.length > 1 ? "s" : ""}`);
+    aviso(`<b>Sem conexão com a planilha.</b> ${fila.length} alteraç${fila.length > 1 ? "ões estão salvas" : "ão está salva"} neste aparelho e ${fila.length > 1 ? "serão enviadas" : "será enviada"} automaticamente quando a internet voltar.`);
+  } else if (online) { setSync("ok", "Salvo na planilha · ao vivo"); aviso(""); }
+  else { setSync("off", "Sem internet · dados do aparelho"); }
+}
 function aplicarLista(itens) {
-  const ids = itens.map(v => v._id);
+  const lista = comFila(itens);
+  const ids = lista.map(v => v._id);
   if (vistos) ids.forEach(id => { if (!vistos.has(id)) novos.add(id); });
   vistos = new Set(ids);
-  visitantes = itens;
+  visitantes = lista;
   ultimaAtualizacao = new Date();
-  setSync("ok", "Conectado à planilha");
+  guardarLocal();
   renderAll();
+}
+async function enviarFila() {
+  if (enviando || !codigo) return;
+  enviando = true;
+  try {
+    while (fila.length) {
+      await api(fila[0].acao, fila[0].dados);
+      fila.shift(); guardarLocal();
+    }
+  } catch (e) {
+    if (e.code === "codigo") pedirCodigo("Código incorreto. Confira com a responsável.");
+  } finally { enviando = false; }
 }
 async function carregar() {
   if (carregando || !codigo) return;
   carregando = true;
-  try { const j = await api("listar"); aplicarLista(j.itens || []); aviso(""); }
-  catch (e) {
+  try {
+    await enviarFila();
+    const j = await api("listar");
+    aplicarLista(j.itens || []);
+    statusConexao(true);
+  } catch (e) {
     if (e.code === "codigo") { pedirCodigo("Código incorreto. Confira com a responsável."); }
     else if (e.code === "config") { setSync("off", "Não configurado"); aviso("<b>Site ainda não ligado à planilha.</b> Cole a URL do Apps Script em API_URL no arquivo index.html."); }
-    else { setSync("off", "Sem conexão"); }
+    else statusConexao(false);
   } finally { carregando = false; }
 }
 function linhaPlanilha(v) { return GS_COLS.map(([, f]) => { const s = String(f(v) ?? ""); return /^[=+\-@]/.test(s) ? "'" + s : s; }); }
 async function salvarItem(v) {
   const limpo = Object.assign({}, v); delete limpo._id;
-  await api("salvar", { id: v._id, item: limpo, linha: linhaPlanilha(v) });
+  fila = fila.filter(op => !(op.acao === "salvar" && op.dados.id === v._id));
+  fila.push({ acao: "salvar", dados: { id: v._id, item: limpo, linha: linhaPlanilha(v), cabecalho: GS_COLS.map(c => c[0]) } });
   const i = visitantes.findIndex(x => x._id === v._id);
   if (i >= 0) visitantes[i] = v; else { visitantes.push(v); vistos && vistos.add(v._id); }
-  renderAll();
-  carregar();
+  guardarLocal(); renderAll();
+  await enviarFila();
+  statusConexao(!fila.length);
+  if (!fila.length) carregar();
 }
 async function excluirItem(id) {
-  await api("excluir", { id });
+  fila = fila.filter(op => !(op.acao === "salvar" && op.dados.id === id));
+  fila.push({ acao: "excluir", dados: { id, cabecalho: GS_COLS.map(c => c[0]) } });
   visitantes = visitantes.filter(x => x._id !== id);
-  renderAll();
-  carregar();
+  guardarLocal(); renderAll();
+  await enviarFila();
+  statusConexao(!fila.length);
+  if (!fila.length) carregar();
 }
 
 function pedirCodigo(msg) {
@@ -1011,10 +1139,17 @@ $("code-form").addEventListener("submit", e => {
   $("code-overlay").hidden = true;
   carregar();
 });
-$("btn-sair").addEventListener("click", () => { codigo = ""; try { localStorage.removeItem(CODIGO_KEY); } catch (e) {} visitantes = []; renderAll(); pedirCodigo(); });
+$("btn-sair").addEventListener("click", () => {
+  if (fila.length) { toast("Ainda há alterações para enviar. Conecte à internet antes de sair."); return; }
+  codigo = ""; try { localStorage.removeItem(CODIGO_KEY); localStorage.removeItem(CACHE_KEY); } catch (e) {}
+  visitantes = []; renderAll(); pedirCodigo();
+});
 
 function iniciar() {
+  const c = lerCache();
+  if (codigo && (c || fila.length)) { aplicarLista((c && c.itens) || []); statusConexao(false); setSync(fila.length ? "off" : "", fila.length ? `${fila.length} pendente(s)` : "Atualizando…"); }
   if (!codigo) pedirCodigo(); else carregar();
+  window.addEventListener("online", carregar);
   pollTimer = setInterval(() => { if (!document.hidden) carregar(); }, 15000);
   document.addEventListener("visibilitychange", () => { if (!document.hidden) carregar(); });
 }
